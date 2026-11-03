@@ -5,12 +5,14 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
 
   build:
-    if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft)
-    runs-on: [self-hosted, cf-linux]
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # Broker-side trust enforcement is required before enabling this on a public repo.
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' || 'cf-linux' }}
     steps:
     - uses: actions/checkout@v4
 
